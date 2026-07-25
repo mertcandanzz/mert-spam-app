@@ -593,6 +593,12 @@ static void input_callback(InputEvent* input, void* ctx) {
 int32_t ble_spam(void* p) {
     UNUSED(p);
     State* state = malloc(sizeof(State));
+    // Initialize all state fields to prevent NULL pointer dereference
+    state->resume = false;
+    state->advertising = false;
+    state->delay = 1;
+    state->index = 0;
+    state->protocol_index = 0;
     state->thread = furi_thread_alloc();
     furi_thread_set_callback(state->thread, adv_thread);
     furi_thread_set_context(state->thread, state);
