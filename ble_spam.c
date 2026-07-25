@@ -58,7 +58,8 @@ uintptr_t* scan_memory_for_sequence(uint32_t sequence) {
             return (uintptr_t*)(addr - SEQUENCE_OFFSET);
         }
     }
-    return (uintptr_t*)HCI_SEND_REQ_ADDR; // If not found, default to 0.90.1 OFW offset
+    // Return NULL if not found - let caller handle it
+    return NULL;
 }
 
 int (*napi_hci_send_req)(struct hci_request* p_cmd, uint8_t async) = NULL;
@@ -102,7 +103,7 @@ tBleStatus aci_gap_additional_beacon_start(
     rq.clen = index_input;
     rq.rparam = &status;
     rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    if(!napi_hci_send_req || napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
     return status;
 }
 
@@ -114,7 +115,7 @@ tBleStatus aci_gap_additional_beacon_stop(void) {
     rq.ocf = 0x0b1;
     rq.rparam = &status;
     rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    if(!napi_hci_send_req || napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
     return status;
 }
 
@@ -136,7 +137,7 @@ tBleStatus aci_gap_additional_beacon_set_data(uint8_t Adv_Data_Length, const uin
     rq.clen = index_input;
     rq.rparam = &status;
     rq.rlen = 1;
-    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    if(!napi_hci_send_req || napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
     return status;
 }
 
@@ -425,11 +426,15 @@ static int32_t adv_thread(void* ctx) {
 }
 
 static void toggle_adv(State* state) {
+    if(!state) return;
+    
     if(state->advertising) {
         state->advertising = false;
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
-        if(state->resume) furi_hal_bt_start_advertising();
+        if(state->resume) {
+            furi_hal_bt_start_advertising();
+        }
     } else {
         state->resume = furi_hal_bt_is_active();
         furi_hal_bt_stop_advertising();
@@ -612,8 +617,12 @@ int32_t ble_spam(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     bool running = true;
-    napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
-        (uintptr_t)(scan_memory_for_sequence(TARGET_SEQUENCE)) | 0x01);
+    // Find the HCI function - handle NULL case
+    uintptr_t* found_addr = scan_memory_for_sequence(TARGET_SEQUENCE);
+    if(found_addr != NULL) {
+        napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
+            (uintptr_t)found_addr | 0x01);
+    }
     while(running) {
         InputEvent input;
         furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
