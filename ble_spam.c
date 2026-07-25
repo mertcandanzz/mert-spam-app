@@ -3,31 +3,11 @@
 #include <furi_hal_bt.h>
 #include <stdint.h>
 #include <furi_hal_random.h>
-#include "mert_spam_icons.h"
 #include "protocols/_registry.h"
 
-// NAPI
-// TODO: Use __attribute__((aligned(2))) instead?
-// TODO: Use an offset of the base address?
+// Using official furi_hal_bt_extra_beacon API (Momentum compatible)
 
-#define TAG "FuriHalBt"
-#define BLE_STATUS_TIMEOUT 0xFFU
-#define BLE_CMD_MAX_PARAM_LEN 255
-
-typedef uint8_t tBleStatus;
-
-typedef __PACKED_STRUCT {
-    uint8_t Adv_Data_Length;
-    uint8_t Adv_Data[BLE_CMD_MAX_PARAM_LEN - 1];
-}
-aci_gap_additional_beacon_set_data_cp0;
-
-typedef __PACKED_STRUCT {
-    uint16_t Adv_Interval_Min;
-    uint16_t Adv_Interval_Max;
-    uint8_t Adv_Channel_Map;
-    uint8_t Own_Address_Type;
-    uint8_t Own_Address[6];
+#define TAG "MertSpam"
     uint8_t PA_Level;
 }
 aci_gap_additional_beacon_start_cp0;
@@ -404,7 +384,8 @@ static int32_t adv_thread(void* ctx) {
                 &size, &packet, NULL);
         }
         
-        napi_furi_hal_bt_custom_adv_set(packet, size);
+        // Set beacon data using official API
+        furi_check(furi_hal_bt_extra_beacon_set_data(packet, size));
         free(packet);
 
         if(use_random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
@@ -416,10 +397,27 @@ static int32_t adv_thread(void* ctx) {
             delay = delays[state->delay];
         }
         
-        // TX Power: 0x1F = Maximum (127.5 dBm)
-        napi_furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+        // Configure and start beacon using official API
+        GapExtraBeaconConfig config = {
+            .min_adv_interval_ms = delay,
+            .max_adv_interval_ms = delay * 1.5,
+            .address = {0},
+            .adv_channel_map = 0x07, // All 3 channels
+            .own_address_type = 0x00, // Public
+            .tx_power = 0x1F, // Maximum
+        };
+        
+        if(use_random_mac) {
+            furi_hal_random_fill_buf(config.address, sizeof(config.address));
+        } else {
+            memcpy(config.address, mac, sizeof(config.address));
+        }
+        
+        furi_check(furi_hal_bt_extra_beacon_set_config(&config));
+        furi_check(furi_hal_bt_extra_beacon_start());
+        
         furi_thread_flags_wait(true, FuriFlagWaitAny, delay);
-        napi_furi_hal_bt_custom_adv_stop();
+        furi_check(furi_hal_bt_extra_beacon_stop());
     }
 
     return 0;
