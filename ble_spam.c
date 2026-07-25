@@ -470,8 +470,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     const Attack* attack =
         (state->index >= 0 && state->index <= ATTACK_COUNT - 1) ? &attacks[state->index] : NULL;
-    const Payload* payload = &attack->payload;
-    const BleSpamProtocol* protocol = (attack && payload->protocol) ? payload->protocol : NULL;
+    const Payload* payload = attack ? &attack->payload : NULL;
+    const BleSpamProtocol* protocol = (attack && payload && payload->protocol) ? payload->protocol : NULL;
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 4, 10, "MERT");
@@ -560,7 +560,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             "%02i/%02i: %s",
             state->index + 1,
             ATTACK_COUNT,
-            protocol ? protocol->get_name(&payload->msg) : "Everything");
+            protocol && payload ? protocol->get_name(&payload->msg) : "Everything");
         canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 24, str);
 
         canvas_set_font(canvas, FontPrimary);
