@@ -29,4 +29,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mert_spam.fap
-          path: build/f7/*.fap
+          path: ~/.ufbt/build/*.fap
