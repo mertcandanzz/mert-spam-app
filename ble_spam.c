@@ -8,6 +8,9 @@
 // Using official furi_hal_bt_extra_beacon API (Momentum compatible)
 
 #define TAG "MertSpam"
+
+// Legacy type for unused NAPI code (kept for reference)
+typedef uint8_t tBleStatus;
     uint8_t PA_Level;
 }
 aci_gap_additional_beacon_start_cp0;
@@ -347,7 +350,7 @@ static int32_t adv_thread(void* ctx) {
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
-    uint8_t mac[GAP_MAC_ADDR_SIZE];
+    uint8_t mac[6];
     Payload* payload = &attacks[state->index].payload;
     
     // Initialize protocol index for Mert's Special
@@ -403,8 +406,7 @@ static int32_t adv_thread(void* ctx) {
             .max_adv_interval_ms = delay * 1.5,
             .address = {0},
             .adv_channel_map = 0x07, // All 3 channels
-            .own_address_type = 0x00, // Public
-            .tx_power = 0x1F, // Maximum
+            .address_type = GapAddressTypePublic,
         };
         
         if(use_random_mac) {
