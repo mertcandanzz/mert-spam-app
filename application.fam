@@ -1,0 +1,15 @@
+App(
+    appid="mert_spam",
+    name="MERT Spam",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="ble_spam",
+    requires=["gui"],
+    stack_size=5 * 1024,
+    fap_icon="ble_spam_10px.png",
+    fap_category="Bluetooth",
+    fap_icon_assets="icons",
+    fap_author="@Willy-JL @ECTO-1A @Spooks4576 @Kiro",
+    fap_version="2.1",
+    fap_description="MERT Spam - Advanced BLE spam with 2025-2026 device IDs + Tesla support!",
+)
