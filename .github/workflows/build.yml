@@ -19,7 +19,7 @@ jobs:
       - name: Install uFBT
         run: |
           pip install ufbt
-          ufbt install
+          ufbt update
       
       - name: Build FAP
         run: |
