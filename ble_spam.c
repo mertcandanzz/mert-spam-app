@@ -3,7 +3,7 @@
 #include <furi_hal_bt.h>
 #include <stdint.h>
 #include <furi_hal_random.h>
-#include "ble_spam_icons.h"
+#include "mert_spam_icons.h"
 #include "protocols/_registry.h"
 
 // NAPI
@@ -474,7 +474,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     const BleSpamProtocol* protocol = (attack && payload->protocol) ? payload->protocol : NULL;
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_icon(canvas, 4, 3, (protocol && protocol->icon) ? protocol->icon : &I_ble);
+    canvas_draw_str(canvas, 4, 10, "MERT");
     canvas_draw_str(canvas, 14, 12, "MERT Spam");
 
     switch(state->index) {
@@ -551,8 +551,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         snprintf(str, sizeof(str), "%ims", delays[state->delay]);
         canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, str);
-        canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
-        canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
+        // Arrow indicators removed - using text only
 
         canvas_set_font(canvas, FontPrimary);
         snprintf(
