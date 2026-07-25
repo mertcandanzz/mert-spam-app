@@ -92,7 +92,7 @@ void swiftpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpa
 }
 
 const BleSpamProtocol ble_spam_protocol_swiftpair = {
-    .icon = &I_windows,
+    .icon = NULL,
     .get_name = swiftpair_get_name,
     .make_packet = swiftpair_make_packet,
 };

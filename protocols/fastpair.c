@@ -117,7 +117,7 @@ void fastpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpam
 }
 
 const BleSpamProtocol ble_spam_protocol_fastpair = {
-    .icon = &I_android,
+    .icon = NULL,
     .get_name = fastpair_get_name,
     .make_packet = fastpair_make_packet,
 };

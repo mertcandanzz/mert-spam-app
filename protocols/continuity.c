@@ -304,7 +304,7 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
 }
 
 const BleSpamProtocol ble_spam_protocol_continuity = {
-    .icon = &I_apple,
+    .icon = NULL,
     .get_name = continuity_get_name,
     .make_packet = continuity_make_packet,
 };

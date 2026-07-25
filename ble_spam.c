@@ -474,7 +474,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     const BleSpamProtocol* protocol = (attack && payload->protocol) ? payload->protocol : NULL;
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_icon(canvas, 4, 3, protocol ? protocol->icon : &I_ble);
+    canvas_draw_icon(canvas, 4, 3, (protocol && protocol->icon) ? protocol->icon : &I_ble);
     canvas_draw_str(canvas, 14, 12, "MERT Spam");
 
     switch(state->index) {
